@@ -1,7 +1,7 @@
 # Личный проект «Типотека» [![Build status][travis-image]][travis-url]
 
 * Студент: [Bodik Malomuzh](https://up.htmlacademy.ru/nodejs/3/user/329099).
-* Наставник: `Неизвестно`.
+* Наставник: [Вадим Шевяков](https://up.htmlacademy.ru/nodejs/3/user/574589).
 
 ---
 
