@@ -1,6 +1,7 @@
 'use strict'
 
 const fs = require(`fs`).promises;
+const path = require(`path`);
 const chalk = require('chalk');
 const {ExitCode} = require(`../../constants`);
 const {
@@ -8,87 +9,46 @@ const {
   shuffle,
 } = require(`../../utils`);
 
+const FILE_NAME = `mocks.json`;
+const DATA_DIR = `data`;
+const CATEGORIES_FILE = `categories.txt`;
+const SENTENCES_FILE = `sentences.txt`;
+const TITLES_FILE = `titles.txt`;
+const YEAR = 2021;
+
 const Count = {
   DEFAULT: 1,
   MAX: 1000,
-}
-const FILE_NAME = `mocks.json`;
-
-const TITLES = [
-  `Ёлки. История деревьев`,
-  `Как перестать беспокоиться и начать жить`,
-  `Как достигнуть успеха не вставая с кресла`,
-  `Обзор новейшего смартфона`,
-  `Лучшие рок-музыканты 20-века`,
-  `Как начать программировать`,
-  `Учим HTML и CSS`,
-  `Что такое золотое сечение`,
-  `Как собрать камни бесконечности`,
-  `Борьба с прокрастинацией`,
-  `Рок — это протест`,
-  `Самый лучший музыкальный альбом этого года`,
-];
-
-const SENTENCES = [
-  `Ёлки — это не просто красивое дерево. Это прочная древесина.`,
-  `Первая большая ёлка была установлена только в 1938 году.`,
-  `Вы можете достичь всего. Стоит только немного постараться и запастись книгами.`,
-  `Этот смартфон — настоящая находка. Большой и яркий экран, мощнейший процессор — всё это в небольшом гаджете.`,
-  `Золотое сечение — соотношение двух величин, гармоническая пропорция.`,
-  `Собрать камни бесконечности легко, если вы прирожденный герой.`,
-  `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике.`,
-  `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-  `Программировать не настолько сложно, как об этом говорят.`,
-  `Простые ежедневные упражнения помогут достичь успеха.`,
-  `Это один из лучших рок-музыкантов.`,
-  `Он написал больше 30 хитов.`,
-  `Из под его пера вышло 8 платиновых альбомов.`,
-  `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем.`,
-  `Рок-музыка всегда ассоциировалась с протестами. Так ли это на самом деле?`,
-  `Достичь успеха помогут ежедневные повторения.`,
-  `Помните, небольшое количество ежедневных упражнений лучше, чем один раз, но много.`,
-  `Как начать действовать? Для начала просто соберитесь.`,
-  `Игры и программирование разные вещи. Не стоит идти в программисты, если вам нравятся только игры.`,
-  `Альбом стал настоящим открытием года. Мощные гитарные рифы и скоростные соло-партии не дадут заскучать.`,
-];
-
-const CATEGORIES = [
-  `Деревья`,
-  `За жизнь`,
-  `Без рамки`,
-  `Разное`,
-  `IT`,
-  `Музыка`,
-  `Кино`,
-  `Программирование`,
-  `Железо`,
-];
-
-const YEAR = 2021;
-
+};
 const MonthRestrict = {
   MIN: 0,
   MAX: 3,
 };
-
 const DayRestrict = {
   MIN: 0,
   MAX: 25,
 };
-
 const HoursRestrict = {
   MIN: 0,
   MAX: 23,
 };
-
 const MinutesRestrict = {
   MIN: 0,
   MAX: 60,
 };
-
 const SecondsRestrict = {
   MIN: 0,
   MAX: 60,
+};
+
+const getData = async (fileName) => {
+  try {
+    const filePath = path.join(process.cwd(), DATA_DIR, fileName);
+    const file = await fs.readFile(filePath);
+    return file.toString().split(`\n`).slice(0, -1);
+  } catch (error) {
+    console.error(`Can't open file...\n${error}`)
+  }
 };
 
 const generateDate = () => {
@@ -110,19 +70,23 @@ const generateDate = () => {
   return `${newDate.getFullYear()}-${MM}-${DD} ${hh}:${mm}:${ss}`;
 };
 
-const generateOffers = (count) => (
-  Array(count).fill({}).map(() => {
-    const announceAndfullText = shuffle(SENTENCES);
+const generateOffers = async (count) => {
+  const categories = await getData(CATEGORIES_FILE);
+  const sentences = await getData(SENTENCES_FILE);
+  const titles = await getData(TITLES_FILE);
+
+  return Array(count).fill({}).map(() => {
+    const announceAndFullText = shuffle(sentences);
 
     return {
-      title: TITLES[getRandomInt(0, TITLES.length - 1)],
-      announce: announceAndfullText.slice(1, 5).join(` `),
-      fullText: announceAndfullText.slice(5, announceAndfullText.length - 1).join(` `),
+      title: titles[getRandomInt(0, titles.length - 1)],
+      announce: announceAndFullText.slice(1, 5).join(` `),
+      fullText: announceAndFullText.slice(5, announceAndFullText.length - 1).join(` `),
       createdDate: generateDate(),
-      category: shuffle(CATEGORIES).slice(1, getRandomInt(2, CATEGORIES.length - 1)),
+      category: shuffle(categories).slice(1, getRandomInt(2, categories.length - 1)),
     }
   })
-);
+};
 
 module.exports = {
   name: `--generate`,
@@ -135,7 +99,7 @@ module.exports = {
     }
 
     const countOffer = Number.parseInt(count, 10) || Count.DEFAULT;
-    const content = JSON.stringify(generateOffers(countOffer));
+    const content = JSON.stringify(await generateOffers(countOffer));
 
     try {
       await fs.writeFile(FILE_NAME, content);
