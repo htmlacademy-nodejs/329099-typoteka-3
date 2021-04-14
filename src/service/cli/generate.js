@@ -1,8 +1,8 @@
-'use strict'
+'use strict';
 
 const fs = require(`fs`).promises;
 const path = require(`path`);
-const chalk = require('chalk');
+const chalk = require(`chalk`);
 const {ExitCode} = require(`../../constants`);
 const {
   getRandomInt,
@@ -47,19 +47,19 @@ const getData = async (fileName) => {
     const file = await fs.readFile(filePath);
     return file.toString().split(`\n`).slice(0, -1);
   } catch (error) {
-    console.error(`Can't open file...\n${error}`)
+    return console.error(`Can't open file...\n${error}`);
   }
 };
 
 const generateDate = () => {
   const currentDate = new Date();
   const newDate = new Date(
-    YEAR,
-    currentDate.getMonth() + getRandomInt(MonthRestrict.MIN, MonthRestrict.MAX),
-    currentDate.getDate() + getRandomInt(DayRestrict.MIN, DayRestrict.MAX),
-    currentDate.getHours() + getRandomInt(HoursRestrict.MIN, HoursRestrict.MAX),
-    currentDate.getMinutes() + getRandomInt(MinutesRestrict.MIN, MinutesRestrict.MAX),
-    currentDate.getSeconds() + getRandomInt(SecondsRestrict.MIN, SecondsRestrict.MAX))
+      YEAR,
+      currentDate.getMonth() + getRandomInt(MonthRestrict.MIN, MonthRestrict.MAX),
+      currentDate.getDate() + getRandomInt(DayRestrict.MIN, DayRestrict.MAX),
+      currentDate.getHours() + getRandomInt(HoursRestrict.MIN, HoursRestrict.MAX),
+      currentDate.getMinutes() + getRandomInt(MinutesRestrict.MIN, MinutesRestrict.MAX),
+      currentDate.getSeconds() + getRandomInt(SecondsRestrict.MIN, SecondsRestrict.MAX));
 
   const MM = newDate.getMonth() + 1 >= 10 ? newDate.getMonth() + 1 : `0${newDate.getMonth() + 1}`;
   const DD = newDate.getDate() >= 10 ? newDate.getDate() : `0${newDate.getDate()}`;
@@ -84,8 +84,8 @@ const generateOffers = async (count) => {
       fullText: announceAndFullText.slice(5, announceAndFullText.length - 1).join(` `),
       createdDate: generateDate(),
       category: shuffle(categories).slice(1, getRandomInt(2, categories.length - 1)),
-    }
-  })
+    };
+  });
 };
 
 module.exports = {
